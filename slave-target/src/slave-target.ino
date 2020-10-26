@@ -6,6 +6,11 @@ bool flash = false;
 bool test = false;
 
 void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+
+  do_flash();
+
   Wire.begin(SLAVE_ID);
   Wire.onReceive(receiveEvent);
 }
