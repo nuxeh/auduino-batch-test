@@ -3,6 +3,11 @@
 
 #define SWITCH 2
 
+#ifndef SLAVE_ID
+#warning "MAX_SLAVES has not been set, using default 14"
+#define MAX_SLAVES 14
+#endif
+
 void setup() {
   Serial.begin(115200);
 
