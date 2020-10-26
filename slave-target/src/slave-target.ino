@@ -1,6 +1,10 @@
 #include <Arduino.h>
-
 #include <Wire.h>
+
+#ifndef SLAVE_ID
+#warning "SLAVE_ID has not been set, using default 0x01"
+#define SLAVE_ID 0x01
+#endif
 
 bool flash = false;
 bool test = false;
