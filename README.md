@@ -25,24 +25,32 @@ platformio run -e master --upload-port /dev/ttyUSB0 -t upload
 
 The following can be used to flash a slave with a chosen ID.
 
+Slave ID 1:
 ```
-# Slave ID 1
 cd slave_target
 platformio run -e slave_target_1 --upload-port /dev/ttyUSB1 -t upload
+```
 
-# Slave ID 2
+Slave ID 2:
+```
 cd slave_target
 platformio run -e slave_target_2 --upload-port /dev/ttyUSB1 -t upload
+```
 
-# Slave ID 3
+Slave ID 3:
+```
 cd slave_target
 platformio run -e slave_target_3 --upload-port /dev/ttyUSB1 -t upload
+```
 
-# Slave ID 4
+Slave ID 4:
+```
 cd slave_target
 platformio run -e slave_target_4 --upload-port /dev/ttyUSB1 -t upload
+```
 
-# Slave with manually set ID
+Slave with manually set ID:
+```
 cd slave_target
 export PLATFORMIO_BUILD_FLAGS='-SLAVE_ID=0'
 platformio run -e slave_target --upload-port /dev/ttyUSB1 -t upload
