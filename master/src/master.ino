@@ -5,19 +5,35 @@
 
 void setup() {
   Serial.begin(115200);
+
+  // Pin initialisations
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+  pinMode(SWITCH, INPUT_PULLUP);
+
   Wire.begin();
   Wire.onReceive(receiveEvent);
 }
 
 void loop() {
+  // Wait for switch to be pressed
+  while (digitalRead(SWITCH) == HIGH) {
+    do_flash();
+    delay(100);
+  }
+
   // Detect button start event with simple debouncing
-  if (digitalRead(SWITCH) == HIGH) {
+  if (digitalRead(SWITCH) == LOW) {
     delay(50);
-    if (digitalRead(SWITCH) == HIGH) {
+    if (digitalRead(SWITCH) == LOW) {
       Serial.println("Button pressed, starting scan");
       scan();
+
+      // Wait for switch to be released
+      while (digitalRead(SWITCH) == LOW) {}
     }
   }
+
   delay(50);
 }
 
@@ -48,4 +64,10 @@ void scan() {
 // - ACK for self test
 void receiveEvent(int n) {
 
+}
+
+void do_flash() {
+    digitalWrite(LED_BUILTIN, HIGH);
+    delay(100);
+    digitalWrite(LED_BUILTIN, LOW);
 }
