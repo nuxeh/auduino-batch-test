@@ -11,22 +11,28 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW);
   pinMode(SWITCH, INPUT_PULLUP);
 
+  // Begin I2C as master
   Wire.begin();
   Wire.onReceive(receiveEvent);
+
+  Serial.print("Master arduino waiting for input.");
 }
 
 void loop() {
   // Wait for switch to be pressed
   while (digitalRead(SWITCH) == HIGH) {
     do_flash();
-    delay(100);
+    delay(200);
   }
 
   // Detect button start event with simple debouncing
   if (digitalRead(SWITCH) == LOW) {
     delay(50);
+
     if (digitalRead(SWITCH) == LOW) {
       Serial.println("Button pressed, starting scan");
+
+      // Run scan
       scan();
 
       // Wait for switch to be released
@@ -49,15 +55,22 @@ void scan() {
 
       delay(50);
 
-      // Signal self test
-      Serial.print("Starting self-test");
-      Wire.beginTransmission(addr);
-      Wire.write("GT");
-      Wire.endTransmission();
+      // Start self test
+      run_test(addr);
     }
 
-    delay(100);
+    delay(200);
   }
+}
+
+// Signal to slave to start self-test
+void run_test(int addr) {
+    Serial.print("Starting self-test for slave ID ");
+    Serial.println(addr);
+
+    Wire.beginTransmission(addr);
+    Wire.write("GT");
+    Wire.endTransmission();
 }
 
 // Receive response
@@ -66,6 +79,7 @@ void receiveEvent(int n) {
 
 }
 
+// Flash LED
 void do_flash() {
     digitalWrite(LED_BUILTIN, HIGH);
     delay(100);
