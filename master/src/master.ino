@@ -3,7 +3,7 @@
 
 #define SWITCH 2
 
-#ifndef SLAVE_ID
+#ifndef MAX_SLAVES
 #warning "MAX_SLAVES has not been set, using default 14"
 #define MAX_SLAVES 14
 #endif
