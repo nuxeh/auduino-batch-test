@@ -109,7 +109,7 @@ int run_analog_self_test(int chan) {
 
   // 50% duty cycle PWM (2.5V)
   // Target is 512 +/- 100
-  analogWrite(test_chan, 127);
+  analogWrite(test_chan, 180);
   delay(4000);
   result = analogRead(input);
 
