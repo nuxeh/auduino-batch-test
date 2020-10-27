@@ -50,7 +50,7 @@ void loop() {
 
 // Run tests for all channels
 void self_test() {
-  for (uint8_t chan=1; chan<num_outputs; chan++) {
+  for (uint8_t chan=0; chan<num_outputs; chan++) {
       Serial.print("Testing analog output ");
       Serial.println(chan);
 
@@ -58,7 +58,12 @@ void self_test() {
       int result = run_analog_self_test(chan);
 
       Serial.print("Result: ");
-      Serial.println(result);
+      Serial.print(result);
+      if (result == 0) {
+        Serial.println(" PASS");
+      } else {
+        Serial.println(" FAIL");
+      }
   }
 }
 
@@ -83,7 +88,7 @@ int run_analog_self_test(int chan) {
   delay(2000);
   result = analogRead(input);
 
-  Serial.print("Read: ");
+  Serial.print("Expect > 100. Read: ");
   Serial.println(result);
 
   if (result > 100) {
@@ -98,7 +103,7 @@ int run_analog_self_test(int chan) {
   delay(2000);
   result = analogRead(input);
 
-  Serial.print("Read: ");
+  Serial.print("Expect < 924. Read: ");
   Serial.println(result);
 
   if (result < 924) {
@@ -113,7 +118,7 @@ int run_analog_self_test(int chan) {
   delay(4000);
   result = analogRead(input);
 
-  Serial.print("Read: ");
+  Serial.print("Expect 412 <= x <= 612. Read: ");
   Serial.println(result);
 
   // Reset analogue output
