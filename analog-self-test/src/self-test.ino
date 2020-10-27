@@ -17,7 +17,7 @@ void setup() {
   pinMode(SWITCH, INPUT_PULLUP);
 
   // Analog test input
-  pinMode(input, INPUT);
+  //pinMode(input, INPUT);
 
   Serial.println("Analog self test demo.");
 }
@@ -69,17 +69,18 @@ int run_analog_self_test(int chan) {
   // Get the pin number for the test channel
   int test_chan = outputs[chan];
 
-  // Set output under test to output
-  pinMode(test_chan, OUTPUT);
-
   // Set all other output pins to high impedance
   for (uint8_t i=0; i<num_outputs; i++) {
     pinMode(outputs[i], INPUT); // Set to high impedance
   }
 
+  // Set output under test to output
+  pinMode(test_chan, OUTPUT);
+
   // Off (0V)
   // Target is 0 with dead band of 100 (10%) to allow for noise
   digitalWrite(test_chan, LOW);
+  delay(2000);
   result = analogRead(input);
 
   Serial.print("Read: ");
@@ -94,6 +95,7 @@ int run_analog_self_test(int chan) {
   // On (5V)
   // Target is 255 with dead band of 100 (10%) for noise
   digitalWrite(test_chan, HIGH);
+  delay(2000);
   result = analogRead(input);
 
   Serial.print("Read: ");
@@ -108,6 +110,7 @@ int run_analog_self_test(int chan) {
   // 50% duty cycle PWM (2.5V)
   // Target is 512 +/- 100
   analogWrite(test_chan, 127);
+  delay(2000);
   result = analogRead(input);
 
   Serial.print("Read: ");
