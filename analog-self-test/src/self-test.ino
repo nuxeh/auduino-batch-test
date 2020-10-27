@@ -82,13 +82,13 @@ int run_analog_self_test(int chan) {
   // Set output under test to output
   pinMode(test_chan, OUTPUT);
 
-  // Off (0V)
+  // Off (0V) /////////////////////////////////////////////////////
   // Target is 0 with dead band of 100 (10%) to allow for noise
   digitalWrite(test_chan, LOW);
   delay(2000);
   result = analogRead(input);
 
-  Serial.print("Expect > 100. Read: ");
+  Serial.print("Expect <= 100. Read: ");
   Serial.println(result);
 
   if (result > 100) {
@@ -97,13 +97,13 @@ int run_analog_self_test(int chan) {
 
   delay(250);
 
-  // On (5V)
+  // On (5V) //////////////////////////////////////////////////////
   // Target is 255 with dead band of 100 (10%) for noise
   digitalWrite(test_chan, HIGH);
   delay(2000);
   result = analogRead(input);
 
-  Serial.print("Expect < 924. Read: ");
+  Serial.print("Expect >= 924. Read: ");
   Serial.println(result);
 
   if (result < 924) {
@@ -112,7 +112,7 @@ int run_analog_self_test(int chan) {
 
   delay(250);
 
-  // 50% duty cycle PWM (2.5V)
+  // 50% duty cycle PWM (2.5V) ////////////////////////////////////
   // Target is 512 +/- 100
   analogWrite(test_chan, 180);
   delay(4000);
