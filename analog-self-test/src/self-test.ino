@@ -78,42 +78,42 @@ int run_analog_self_test(int chan) {
   }
 
   // Off (0V)
-  // Target is 0 with dead band of 20 to allow for noise
-  digitalWrite(test_chan, HIGH);
-  result = analogRead(input);
-
-  Serial.print("Read: ");
-  Serial.println(result);
-
-  if (result > 20) {
-    return 1;  // Fail
-  }
-
-  delay(250);
-
-  // On (5V)
-  // Target is 255 with dead band of 20 for noise
+  // Target is 0 with dead band of 100 (10%) to allow for noise
   digitalWrite(test_chan, LOW);
   result = analogRead(input);
 
   Serial.print("Read: ");
   Serial.println(result);
 
-  if (result < 235) {
+  if (result > 100) {
+    return 1;  // Fail
+  }
+
+  delay(250);
+
+  // On (5V)
+  // Target is 255 with dead band of 100 (10%) for noise
+  digitalWrite(test_chan, HIGH);
+  result = analogRead(input);
+
+  Serial.print("Read: ");
+  Serial.println(result);
+
+  if (result < 924) {
     return 1;  // Fail
   }
 
   delay(250);
 
   // 50% duty cycle PWM (2.5V)
-  // Target is 127 +/- 20
+  // Target is 512 +/- 100
   analogWrite(test_chan, 127);
   result = analogRead(input);
 
   Serial.print("Read: ");
   Serial.println(result);
 
-  if (result < 107 || result > 147) {
+  if (result < 412 || result > 612) {
     return 1;  // Fail
   }
 
