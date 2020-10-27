@@ -81,6 +81,10 @@ int run_analog_self_test(int chan) {
   // Target is 0 with dead band of 20 to allow for noise
   digitalWrite(test_chan, HIGH);
   result = analogRead(input);
+
+  Serial.print("Read: ");
+  Serial.println(result);
+
   if (result > 20) {
     return 1;  // Fail
   }
@@ -91,6 +95,10 @@ int run_analog_self_test(int chan) {
   // Target is 255 with dead band of 20 for noise
   digitalWrite(test_chan, LOW);
   result = analogRead(input);
+
+  Serial.print("Read: ");
+  Serial.println(result);
+
   if (result < 235) {
     return 1;  // Fail
   }
@@ -101,6 +109,10 @@ int run_analog_self_test(int chan) {
   // Target is 127 +/- 20
   analogWrite(test_chan, 127);
   result = analogRead(input);
+
+  Serial.print("Read: ");
+  Serial.println(result);
+
   if (result < 107 || result > 147) {
     return 1;  // Fail
   }
