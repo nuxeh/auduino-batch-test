@@ -110,11 +110,14 @@ int run_analog_self_test(int chan) {
   // 50% duty cycle PWM (2.5V)
   // Target is 512 +/- 100
   analogWrite(test_chan, 127);
-  delay(2000);
+  delay(4000);
   result = analogRead(input);
 
   Serial.print("Read: ");
   Serial.println(result);
+
+  // Reset analogue output
+  digitalWrite(test_chan, 0);
 
   if (result < 412 || result > 612) {
     return 1;  // Fail
