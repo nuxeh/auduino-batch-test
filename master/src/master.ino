@@ -20,7 +20,7 @@ void setup() {
   Wire.begin();
   Wire.onReceive(receiveEvent);
 
-  Serial.print("Master arduino waiting for input.");
+  Serial.println("Master arduino waiting for input.");
 }
 
 void loop() {
