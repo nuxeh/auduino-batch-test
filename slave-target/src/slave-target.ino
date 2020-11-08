@@ -263,16 +263,16 @@ void test_analog_level(uint8_t level) {
     // Test case
     // Difference between read analog value and expected value is more than
     // the dead band, so fail
-    int measured = (int) analogRead(ANALOG_INPUTS[1]);
+    int measured = (int) analogRead(ANALOG_INPUTS[i]);
     if (abs(measured - expected) > ANALOG_DEAD_BAND) {
       analog_results[i] = false;
     }
 
     // Serial debug printing
     #ifdef SERIAL_DEBUG
-    Serial.print("Analog output ");
+    Serial.print("Analog output A");
     Serial.print(i);
-    Serial.print("at level ");
+    Serial.print(" at level ");
     Serial.print(level);
     if (analog_results[i]) {
       Serial.println(": PASSED");
