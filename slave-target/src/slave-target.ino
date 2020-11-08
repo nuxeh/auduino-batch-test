@@ -26,6 +26,8 @@ const size_t num_analog_inputs = sizeof(analog_input) / sizeof(analog_input[0]);
 // Analog results array
 bool analog_results[num_analog_inputs] = {false};
 
+const int ANALOG_TEST_LEVELS[] = {0, 256, 512, 768, 1024};
+const size_t NUM_ANALOG_LEVELS = sizeof(ANALOG_TEST_LEVELS) / sizeof(ANALOG_TEST_LEVELS[0]);
 #define ANALOG_DEAD_BAND 102 // ~10% to account for noise
 
 // Analog output for analog input tests
@@ -48,10 +50,12 @@ size_t num_digital_pairs = sizeof(digital_pairs) / sizeof(digital_pairs[0]);
 #define LED_D 13
 
 void setup() {
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
-
-  do_flash();
+  #ifdef SERIAL_DEBUG
+  Serial.begin(115200);
+  Serial.print("Slave ID ");
+  Serial.print(SLAVE_ID);
+  Serial.print(" starting with serial debug");
+  #endif
 
   Wire.begin(SLAVE_ID);
   Wire.onReceive(receiveEvent);
@@ -88,6 +92,9 @@ void receiveEvent(int n) {
 // Analogue self test
 // Returns 0 for success
 int self_test() {
+  for (int i=0; i<NUM_ANALOG_LEVELS; i++) {
+    test_analog_level(ANALOG_TEST_LEVELS[i]);
+  }
   return 0;
 }
 
@@ -152,9 +159,28 @@ void test_analog_level(uint8_t level) {
   for (int i=0; i<num_analog_inputs; i++) {
     // Difference between read analog value and expected value is less than
     // the dead band, so pass
-    if (abs((int) analogRead(analog_input[1]) - expected) <= ANALOG_DEAD_BAND) {
+    int measured = (int) analogRead(analog_input[1]);
+    if (abs(measured - expected) <= ANALOG_DEAD_BAND) {
       analog_results[i] = true;
     }
+
+    // Serial debug printing
+    #ifdef SERIAL_DEBUG
+    Serial.print("Analog output ");
+    Serial.print(i);
+    Serial.print("at level ");
+    Serial.print(level);
+    if analog_results[i] {
+      Serial.println(": PASSED");
+    } else {
+      Serial.print(": FAILED (expected: ");
+      Serial.print(expected);
+      Serial.print(" got: ");
+      Serial.print(measured);
+      Serial.println(")");
+    }
+    #endif
+
     delay(100);
   }
 
