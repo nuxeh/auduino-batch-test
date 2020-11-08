@@ -112,8 +112,14 @@ void display_results() {
     }
   }
 
+  #ifdef SERIAL_DEBUG
+  int start = 4; // Skip serial pins, which aren't tested
+  #else
+  int start = 0;
+  #endif
+
   // Check result for each digital pin
-  for (int i=0; i<14; i++) {
+  for (int i=start; i<14; i++) {
     if (!digital_results[i]) {
       digital = false;
     }
