@@ -28,7 +28,7 @@ const size_t NUM_ANALOG_TEST_INPUTS = sizeof(ANALOG_INPUTS) / sizeof(ANALOG_INPU
 // on any level, it will be set to false
 bool analog_results[NUM_ANALOG_TEST_INPUTS] = {true};
 
-const int ANALOG_TEST_LEVELS[] = {0, 256, 512, 768, 1024};
+const uint16_t ANALOG_TEST_LEVELS[] = {0, 256, 512, 768, 1024};
 const size_t NUM_ANALOG_LEVELS = sizeof(ANALOG_TEST_LEVELS) / sizeof(ANALOG_TEST_LEVELS[0]);
 // Dead band ~10% to account for noise
 #define ANALOG_DEAD_BAND 102
@@ -256,7 +256,7 @@ void test_digital_pair(const int *n) {
  * The test level is set on the PWM analog output, smoothed by the RC network
  * and read by each analog pin.
  */
-void test_analog_level(uint8_t level) {
+void test_analog_level(uint16_t level) {
   // Rescale to 10-bit
   int expected = (int) (((float) level / 255.0) * 1024.0);
 
