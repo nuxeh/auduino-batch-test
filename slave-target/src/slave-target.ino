@@ -140,31 +140,43 @@ void do_flash() {
  * pair of pins being tested.
  */
 void test_digital_pair(const int *n) {
+  bool result = true;
+
+  // Set pin modes, first test
+  // First pin is output, second pin is input
   pinMode(n[0], OUTPUT);
   pinMode(n[1], INPUT);
 
   digitalWrite(n[0], HIGH);
-
-  Serial.print(digitalRead(n[1]));
-
-  Serial.print(" ");
+  if (digitalRead(n[1]) != HIGH) {
+    result = false;
+  }
 
   digitalWrite(n[0], LOW);
-  Serial.print(digitalRead(n[1]));
-  Serial.print(" ");
+  if (digitalRead(n[1]) != LOW) {
+    result = false;
+  }
 
-  pinMode(n[0], OUTPUT);
-  pinMode(n[1], INPUT);
+  // Set pin modes, second test
+  // Second pin is output, first pin is input
+  pinMode(n[1], OUTPUT);
+  pinMode(n[0], INPUT);
 
-  digitalWrite(n[0], HIGH);
-  Serial.print(digitalRead(n[1]));
-  Serial.print(" ");
-  digitalWrite(n[0], LOW);
-  Serial.println(digitalRead(n[1]));
+  digitalWrite(n[1], HIGH);
+  if (digitalRead(n[0]) != HIGH) {
+    result = false;
+  }
+
+  digitalWrite(n[1], LOW);
+  if (digitalRead(n[0]) != LOW) {
+    result = false;
+  }
 
   // Update results (update both tested pins)
-  digital_results[n[0]] = true;
-  digital_results[n[1]] = true;
+  if (result) {
+    digital_results[n[0]] = true;
+    digital_results[n[1]] = true;
+  }
 }
 
 /* Test analog input for all analog pins, at specified voltage level
