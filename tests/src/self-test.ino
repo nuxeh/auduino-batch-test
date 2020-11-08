@@ -7,7 +7,6 @@ void setup() {
 
   // Pin initialisations
   // LED and switch
-  pinMode(LED_BUILTIN, OUTPUT);
   pinMode(A0, INPUT);
   pinMode(A1, INPUT);
   pinMode(A2, INPUT);
@@ -17,7 +16,6 @@ void setup() {
 
   // Analog test input
   //pinMode(input, INPUT);
-
 
   Serial.println("Analog self test demo.");
 }
@@ -40,4 +38,25 @@ void loop() {
   delay(100);
   Serial.print(" ");
   Serial.println(analogRead(A3));
+
+  // Digital crossover
+  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(12, INPUT);
+
+  digitalWrite(LED_BUILTIN, HIGH);
+  Serial.print(digitalRead(12));
+  Serial.print(" ");
+  digitalWrite(LED_BUILTIN, LOW);
+  Serial.print(digitalRead(12));
+  Serial.print(" ");
+
+  pinMode(12, OUTPUT);
+  pinMode(LED_BUILTIN, INPUT);
+
+  digitalWrite(12, HIGH);
+  Serial.print(digitalRead(LED_BUILTIN));
+  Serial.print(" ");
+  digitalWrite(12, LOW);
+  Serial.println(digitalRead(LED_BUILTIN));
+
 }
