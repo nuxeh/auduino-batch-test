@@ -24,7 +24,7 @@ const int analog_input[] = {A0, A1, A2, A3};
 const size_t num_analog_inputs = sizeof(analog_input) / sizeof(analog_input[0]);
 
 // Analog results array
-bool analog_results[num_analog_inputs] = {false};
+bool analog_results[num_analog_inputs] = {true};
 
 const int ANALOG_TEST_LEVELS[] = {0, 256, 512, 768, 1024};
 const size_t NUM_ANALOG_LEVELS = sizeof(ANALOG_TEST_LEVELS) / sizeof(ANALOG_TEST_LEVELS[0]);
@@ -92,7 +92,15 @@ void receiveEvent(int n) {
 // Analogue self test
 // Returns 0 for success
 int self_test() {
-  for (int i=0; i<NUM_ANALOG_LEVELS; i++) {
+  // Run analog test for all levels defined in ANALOG_TEST_LEVELS
+  for (size_t i=0; i<NUM_ANALOG_LEVELS; i++) {
+    // Serial print
+    #ifdef SERIAL_DEBUG
+    Serial.print("Running analog test at level: ");
+    Serial.println(ANALOG_TEST_LEVELS[i]);
+    #endif
+
+    // Run the test
     test_analog_level(ANALOG_TEST_LEVELS[i]);
   }
   return 0;
@@ -157,11 +165,11 @@ void test_analog_level(uint8_t level) {
   delay(1000);
 
   for (int i=0; i<num_analog_inputs; i++) {
-    // Difference between read analog value and expected value is less than
-    // the dead band, so pass
+    // Difference between read analog value and expected value is more than
+    // the dead band, so fail
     int measured = (int) analogRead(analog_input[1]);
-    if (abs(measured - expected) <= ANALOG_DEAD_BAND) {
-      analog_results[i] = true;
+    if (abs(measured - expected) > ANALOG_DEAD_BAND) {
+      analog_results[i] = false;
     }
 
     // Serial debug printing
