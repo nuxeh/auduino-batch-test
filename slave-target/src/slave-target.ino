@@ -74,7 +74,7 @@ void loop() {
     self_test();
     display_results();
 
-    // Wait 5s before repeating tests
+    // Wait before repeating tests
     delay(10000);
   };
 
@@ -117,6 +117,22 @@ void display_results() {
   // Display results
   digitalWrite(LED_D, digital);
   digitalWrite(LED_A, analog);
+
+  // Serial debug
+  #ifdef SERIAL_DEBUG
+  Serial.println("Analogue test: ");
+  if analog {
+    Serial.println("PASSED");
+  } else {
+    Serial.println("FAILED");
+  }
+  Serial.println("Digital test: ");
+  if digital {
+    Serial.println("PASSED");
+  } else {
+    Serial.println("FAILED");
+  }
+  #endif
 }
 
 // Reset results to start state
