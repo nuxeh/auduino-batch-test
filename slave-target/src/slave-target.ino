@@ -103,8 +103,14 @@ void display_results() {
   bool analog = true;
   bool digital = true;
 
+  // Check result for each digital pin
+  for (int i=0; i<NUM_ANALOG_TEST_INPUTS; i++) {
+    if (!analog_results[i]) {
+      analog = false;
+    }
+  }
 
-  // Check result for each pin
+  // Check result for each digital pin
   for (int i=0; i<14; i++) {
     if (!digital_results[i]) {
       digital = false;
@@ -251,6 +257,7 @@ void test_digital_pair(const int *n) {
  * and read by each analog pin.
  */
 void test_analog_level(uint8_t level) {
+  // Rescale to 10-bit
   int expected = (int) (((float) level / 255.0) * 1024.0);
 
   // Set analog PWM level
@@ -260,21 +267,27 @@ void test_analog_level(uint8_t level) {
   delay(1000);
 
   for (size_t i=0; i<NUM_ANALOG_TEST_INPUTS; i++) {
+    bool result = true;
     // Test case
     // Difference between read analog value and expected value is more than
     // the dead band, so fail
     int measured = (int) analogRead(ANALOG_INPUTS[i]);
+
     if (abs(measured - expected) > ANALOG_DEAD_BAND) {
+      result = false;
+    }
+
+    if (!result) {
       analog_results[i] = false;
     }
 
     // Serial debug printing
     #ifdef SERIAL_DEBUG
-    Serial.print("Analog output A");
+    Serial.print("Analog output ");
     Serial.print(i);
     Serial.print(" at level ");
     Serial.print(level);
-    if (analog_results[i]) {
+    if (result) {
       Serial.println(": PASSED");
     } else {
       Serial.print(": FAILED (expected: ");
