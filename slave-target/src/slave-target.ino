@@ -7,6 +7,9 @@
 #define SLAVE_ID 0x01
 #endif
 
+// Enable for serial debug
+//#define SERIAL_DEBUG
+
 // Flash the LED?
 bool flash = false;
 
