@@ -1,13 +1,40 @@
 #include <Arduino.h>
 #include <Wire.h>
 
+// Define default slave ID if not already defined
 #ifndef SLAVE_ID
 #warning "SLAVE_ID has not been set, using default 0x01"
 #define SLAVE_ID 0x01
 #endif
 
+// Flash the LED?
 bool flash = false;
+
+// Run the tests?
 bool test = false;
+
+// Test states
+bool analog_pass = false;
+bool digital_pass = false;
+
+// Analog inputs to test (all except SDA/SCL)
+int analog_input[] = {A0, A1, A2, A3};
+size_t num_analog_inputs = sizeof(analog_input) / sizeof(analog_input[0]);
+
+// Analog output for analog input tests
+// This is a PWM pin, connected to the RC network
+int analog_output = 6;
+
+int digital_pairs[][2] = {
+  {13, 12},
+  {11, 10},
+  {9, 8},
+  {7, 6},
+  {5, 4},
+  {3, 0},
+  {2, 1},
+};
+size_t num_digital_pairs = sizeof(digital_pairs) / sizeof(digital_pairs[0]);
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
