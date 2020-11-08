@@ -61,7 +61,8 @@ void setup() {
   Serial.begin(115200);
   Serial.print("Slave ID ");
   Serial.print(SLAVE_ID);
-  Serial.print(" starting with serial debug");
+  Serial.println(" starting with serial debug");
+  test = true;
   #endif
 
   Wire.begin(SLAVE_ID);
@@ -121,13 +122,13 @@ void display_results() {
   // Serial debug
   #ifdef SERIAL_DEBUG
   Serial.println("Analogue test: ");
-  if analog {
+  if (analog) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
   }
   Serial.println("Digital test: ");
-  if digital {
+  if (digital) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
@@ -229,6 +230,19 @@ void test_digital_pair(const int *n) {
     digital_results[n[0]] = true;
     digital_results[n[1]] = true;
   }
+
+  // Serial debug printing
+  #ifdef SERIAL_DEBUG
+  Serial.print("Digital I/O ");
+  Serial.print(n[0]);
+  Serial.print("/");
+  Serial.print(n[1]);
+  if (result) {
+    Serial.println(": PASSED");
+  } else {
+    Serial.println(": FAILED");
+  }
+  #endif
 }
 
 /* Test analog input for all analog pins, at specified voltage level
@@ -260,7 +274,7 @@ void test_analog_level(uint8_t level) {
     Serial.print(i);
     Serial.print("at level ");
     Serial.print(level);
-    if analog_results[i] {
+    if (analog_results[i]) {
       Serial.println(": PASSED");
     } else {
       Serial.print(": FAILED (expected: ");
