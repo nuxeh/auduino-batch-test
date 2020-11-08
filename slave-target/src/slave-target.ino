@@ -16,6 +16,8 @@ bool test = false;
 // Test states
 bool analog_pass = false;
 bool digital_pass = false;
+bool analog_test_run = false;
+bool digital_test_run = false;
 
 // Analog inputs to test (all except SDA/SCL)
 const int analog_input[] = {A0, A1, A2, A3};
@@ -30,6 +32,7 @@ bool analog_results[num_analog_inputs] = {false};
 // This is a PWM pin, connected to the RC network
 const int analog_output = 6;
 
+// Digital test pins
 const int digital_pairs[][2] = {
   {13, 12},
   {11, 10},
@@ -147,10 +150,13 @@ void test_analog_level(uint8_t level) {
   delay(1000);
 
   for (int i=0; i<num_analog_inputs; i++) {
+    // Difference between read analog value and expected value is less than
+    // the dead band, so pass
     if (abs((int) analogRead(analog_input[1]) - expected) <= ANALOG_DEAD_BAND) {
       analog_results[i] = true;
     }
     delay(100);
   }
 
+  analog_test_run = true;
 }
