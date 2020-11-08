@@ -18,14 +18,19 @@ bool analog_pass = false;
 bool digital_pass = false;
 
 // Analog inputs to test (all except SDA/SCL)
-int analog_input[] = {A0, A1, A2, A3};
-size_t num_analog_inputs = sizeof(analog_input) / sizeof(analog_input[0]);
+const int analog_input[] = {A0, A1, A2, A3};
+const size_t num_analog_inputs = sizeof(analog_input) / sizeof(analog_input[0]);
+
+// Analog results array
+bool analog_results[num_analog_inputs] = {false};
+
+#define ANALOG_DEAD_BAND 102 // ~10% to account for noise
 
 // Analog output for analog input tests
 // This is a PWM pin, connected to the RC network
-int analog_output = 6;
+const int analog_output = 6;
 
-int digital_pairs[][2] = {
+const int digital_pairs[][2] = {
   {13, 12},
   {11, 10},
   {9, 8},
@@ -35,6 +40,9 @@ int digital_pairs[][2] = {
   {2, 1},
 };
 size_t num_digital_pairs = sizeof(digital_pairs) / sizeof(digital_pairs[0]);
+
+#define LED_A 11
+#define LED_D 13
 
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -85,4 +93,64 @@ void do_flash() {
   digitalWrite(LED_BUILTIN, HIGH);
   delay(100);
   digitalWrite(LED_BUILTIN, LOW);
+}
+
+/* Test a digital pin
+ *
+ * 1. Set first pin of pair to output, set it to high
+ * 2. Set second pin as input, read the value on it. Since the pins are wired
+ *    to eachother, expect this value to be high, due to the other pin's output
+ *    value set above.
+ * 3. Swap, setting second pin to output, first pin to input, and repeat.
+ *
+ * Parameter n is a pointer to a length 2 array for the pin numbers for the
+ * pair of pins being tested.
+ */
+int test_digital_pair(int *n) {
+  int result = 0x00;
+
+  pinMode(n[0], OUTPUT);
+  pinMode(n[1], INPUT);
+
+  digitalWrite(n[0], HIGH);
+
+  Serial.print(digitalRead(n[1]));
+
+  Serial.print(" ");
+
+  digitalWrite(n[0], LOW);
+  Serial.print(digitalRead(n[1]));
+  Serial.print(" ");
+
+  pinMode(n[0], OUTPUT);
+  pinMode(n[1], INPUT);
+
+  digitalWrite(n[0], HIGH);
+  Serial.print(digitalRead(n[1]));
+  Serial.print(" ");
+  digitalWrite(n[0], LOW);
+  Serial.println(digitalRead(n[1]));
+}
+
+/* Test analog input for all analog pins, at specified voltage level
+ *
+ * The test level is set on the PWM analog output, smoothed by the RC network
+ * and read by each analog pin.
+ */
+void test_analog_level(uint8_t level) {
+  int expected = (int) (((float) level / 255.0) * 1024.0);
+
+  // Set analog PWM level
+  analogWrite(analog_output, level);
+
+  // Allow RC network to settle to a stable voltage
+  delay(1000);
+
+  for (int i=0; i<num_analog_inputs; i++) {
+    if (abs((int) analogRead(analog_input[1]) - expected) <= ANALOG_DEAD_BAND) {
+      analog_results[i] = true;
+    }
+    delay(100);
+  }
+
 }
