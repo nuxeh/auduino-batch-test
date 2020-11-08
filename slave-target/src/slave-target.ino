@@ -10,9 +10,6 @@
 // Enable for serial debug
 //#define SERIAL_DEBUG
 
-// Flash the LED?
-bool flash = false;
-
 // Run the tests?
 bool test = false;
 
@@ -58,8 +55,8 @@ const size_t NUM_DIGITAL_PAIRS = sizeof(DIGITAL_PAIRS) / sizeof(DIGITAL_PAIRS[0]
 // Set to true on successful test of a pin pair
 bool digital_results[14] = {false};
 
-#define LED_A 11
-#define LED_D 13
+#define LED_A 13
+#define LED_D 11
 
 void setup() {
   #ifdef SERIAL_DEBUG
