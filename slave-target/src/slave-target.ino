@@ -51,7 +51,7 @@ const size_t NUM_DIGITAL_PAIRS = sizeof(DIGITAL_PAIRS) / sizeof(DIGITAL_PAIRS[0]
 
 // Digital results array, one entry per digital pin
 // Set to true on successful test of a pin pair
-bool digital_results[13] = {false};
+bool digital_results[14] = {false};
 
 #define LED_A 11
 #define LED_D 13
@@ -69,12 +69,13 @@ void setup() {
 }
 
 void loop() {
-  if (flash) {
-    do_flash();
-  };
-
   if (test) {
+    reset_results();
     self_test();
+    display_results();
+
+    // Wait 5s before repeating tests
+    delay(10000);
   };
 
   delay(100);
@@ -86,13 +87,48 @@ void receiveEvent(int n) {
 
   // "Go test" signal
   if (a == 'G' && b == 'T') {
-    flash = true;
     test = true;
   }
 
   // Ensure buffer is empty
   while (Wire.available() > 0) {
     Wire.read();
+  }
+}
+
+// Light LEDs to show results of both tests
+// Successful test is shown with LED lit
+void display_results() {
+  bool analog = true;
+  bool digital = true;
+
+
+  // Check result for each pin
+  for (int i=0; i<14; i++) {
+    if (!digital_results[i]) {
+      digital = false;
+    }
+  }
+
+  // Set LEDs to output
+  pinMode(LED_D, OUTPUT);
+  pinMode(LED_A, OUTPUT);
+
+  // Display results
+  digitalWrite(LED_D, digital);
+  digitalWrite(LED_A, analog);
+}
+
+// Reset results to start state
+void reset_results() {
+  // Digital
+  for (int i=0; i<14; i++) {
+    digital_results[i] = false;
+  }
+
+  // Analog
+  for (size_t i=0; i<NUM_ANALOG_TEST_INPUTS; i++) {
+    analog_results[i] = true;
   }
 }
 
