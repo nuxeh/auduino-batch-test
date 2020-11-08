@@ -20,22 +20,25 @@ bool analog_test_run = false;
 bool digital_test_run = false;
 
 // Analog inputs to test (all except SDA/SCL)
-const int analog_input[] = {A0, A1, A2, A3};
-const size_t num_analog_inputs = sizeof(analog_input) / sizeof(analog_input[0]);
+const int ANALOG_INPUTS[] = {A0, A1, A2, A3};
+const size_t NUM_ANALOG_TEST_INPUTS = sizeof(ANALOG_INPUTS) / sizeof(ANALOG_INPUTS[0]);
 
 // Analog results array
-bool analog_results[num_analog_inputs] = {true};
+// Initialised as pass, since we test multiple analog levels, if a pin fails
+// on any level, it will be set to false
+bool analog_results[NUM_ANALOG_TEST_INPUTS] = {true};
 
 const int ANALOG_TEST_LEVELS[] = {0, 256, 512, 768, 1024};
 const size_t NUM_ANALOG_LEVELS = sizeof(ANALOG_TEST_LEVELS) / sizeof(ANALOG_TEST_LEVELS[0]);
-#define ANALOG_DEAD_BAND 102 // ~10% to account for noise
+// Dead band ~10% to account for noise
+#define ANALOG_DEAD_BAND 102
 
 // Analog output for analog input tests
 // This is a PWM pin, connected to the RC network
-const int analog_output = 6;
+#define ANALOG_OUTPUT 6
 
 // Digital test pins
-const int digital_pairs[][2] = {
+const int DIGITAL_PAIRS[][2] = {
   {13, 12},
   {11, 10},
   {9, 8},
@@ -44,7 +47,11 @@ const int digital_pairs[][2] = {
   {3, 0},
   {2, 1},
 };
-size_t num_digital_pairs = sizeof(digital_pairs) / sizeof(digital_pairs[0]);
+const size_t NUM_DIGITAL_PAIRS = sizeof(DIGITAL_PAIRS) / sizeof(DIGITAL_PAIRS[0]);
+
+// Digital results array, one entry per digital pin
+// Set to true on successful test of a pin pair
+bool digital_results[13] = {false};
 
 #define LED_A 11
 #define LED_D 13
@@ -103,6 +110,14 @@ int self_test() {
     // Run the test
     test_analog_level(ANALOG_TEST_LEVELS[i]);
   }
+
+  // Run digital test for each pin pair
+  for (size_t i=0; i<NUM_DIGITAL_PAIRS; i++) {
+    test_digital_pair(DIGITAL_PAIRS[i]);
+  }
+
+  digital_test_run = true;
+
   return 0;
 }
 
@@ -124,9 +139,7 @@ void do_flash() {
  * Parameter n is a pointer to a length 2 array for the pin numbers for the
  * pair of pins being tested.
  */
-int test_digital_pair(int *n) {
-  int result = 0x00;
-
+void test_digital_pair(const int *n) {
   pinMode(n[0], OUTPUT);
   pinMode(n[1], INPUT);
 
@@ -148,6 +161,10 @@ int test_digital_pair(int *n) {
   Serial.print(" ");
   digitalWrite(n[0], LOW);
   Serial.println(digitalRead(n[1]));
+
+  // Update results (update both tested pins)
+  digital_results[n[0]] = true;
+  digital_results[n[1]] = true;
 }
 
 /* Test analog input for all analog pins, at specified voltage level
@@ -159,15 +176,16 @@ void test_analog_level(uint8_t level) {
   int expected = (int) (((float) level / 255.0) * 1024.0);
 
   // Set analog PWM level
-  analogWrite(analog_output, level);
+  analogWrite(ANALOG_OUTPUT, level);
 
   // Allow RC network to settle to a stable voltage
   delay(1000);
 
-  for (int i=0; i<num_analog_inputs; i++) {
+  for (size_t i=0; i<NUM_ANALOG_TEST_INPUTS; i++) {
+    // Test case
     // Difference between read analog value and expected value is more than
     // the dead band, so fail
-    int measured = (int) analogRead(analog_input[1]);
+    int measured = (int) analogRead(ANALOG_INPUTS[1]);
     if (abs(measured - expected) > ANALOG_DEAD_BAND) {
       analog_results[i] = false;
     }
