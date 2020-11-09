@@ -123,6 +123,11 @@ void display_results() {
     if (!digital_results[i]) {
       digital = false;
     }
+    #if 1
+    Serial.print(i);
+    Serial.print(": ");
+    Serial.println(digital_results[i]);
+    #endif
   }
 
   // Set LEDs to output
