@@ -8,7 +8,7 @@
 #define MAX_SLAVES 14
 #endif
 
-bool test_started[127] = {false};
+bool test_started[128] = {false};
 bool test_results_received[127] = {false};
 
 void setup() {
@@ -85,8 +85,42 @@ void run_test(int addr) {
     test_started[addr] = true;
 }
 
-void poll_results() {
+unsigned long last_poll = 0;
 
+// Non-blocking/"Asynchronously" poll results every 2 seconds
+void poll_results() {
+  if (millis() - last_poll > 2000) {
+    _poll_results();
+    last_poll = millis();
+  }
+}
+
+// Poll results
+void _poll_results() {
+    // Check test run status for all possible slaves
+    for (int addr=0; addr<128; addr++) {
+      // Make requests for those slaves for which a test has started, but
+      // for which no results have yet been received.
+      if (test_started[addr] && ! test_results_received[addr]) {
+        // Request slave status
+        Wire.beginTransmission(addr);
+        Wire.write("RS"); // Request status
+        Wire.endTransmission();
+        Wire.requestFrom(addr, 1);
+
+        // Check if test has completed on slave
+        // Request results if so
+        if (Wire.read() == 0x01) {
+          Wire.beginTransmission(addr);
+          Wire.write("RR"); // Request results
+          Wire.endTransmission();
+          Wire.requestFrom(addr, 3);
+          Serial.println(Wire.read(), BIN);
+          Serial.println(Wire.read(), BIN);
+          Serial.println(Wire.read(), BIN);
+        }
+      }
+    }
 }
 
 // Receive response
@@ -102,7 +136,7 @@ int led_state = LOW;
 // Allowing fast polled response to button press
 // Using pin interrupt would be an alternative for switch detection
 void do_flash(bool long_flash) {
-  int del;
+  unsigned int del;
 
   if (long_flash) {
     del = 1000;
