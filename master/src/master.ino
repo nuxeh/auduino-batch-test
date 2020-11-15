@@ -9,7 +9,8 @@
 #endif
 
 bool test_started[128] = {false};
-bool test_results_received[127] = {false};
+bool test_results_received[128] = {false};
+bool test_result[128] = {false};
 
 void setup() {
   Serial.begin(115200);
@@ -59,6 +60,7 @@ void reset_state() {
   for (int i=0; i<128; i++) {
     test_started[i] = false;
     test_results_received[i] = false;
+    test_result[i] = false;
   }
 }
 
@@ -139,14 +141,62 @@ void _poll_results() {
           test_results_received[addr] = true;
 
           // Check results
+          Serial.print("Slave ");
+          Serial.print(addr);
           if (d0 == 0b11111111 && d1 == 0b111111 && a0 == 0b1111) {
-            Serial.print("Slave ");
-            Serial.print(addr);
             Serial.println(" PASSED");
+            test_result[addr] = true;
+          } else {
+            Serial.println(" FAILED");
+            print_result(d0, d1, a0);
           }
         }
       }
     }
+}
+
+// Format and print detailed results
+// Checks the returned bitfield flags for each i/o pin
+void print_result(byte d0, byte d1, byte a0) {
+  Serial.println(d0, BIN);
+  Serial.println(d1, BIN);
+  Serial.println(a0, BIN);
+
+  // Digital lower byte
+  for (int i=0; i<8; i++) {
+    Serial.print("D");
+    Serial.print(i);
+    Serial.print(": ");
+    if (d0 &= 1 << i) {
+      Serial.println(" PASSED");
+    } else {
+      Serial.println(" FAILED");
+    }
+  }
+
+  // Digital upper byte
+  for (int i=8; i<14; i++) {
+    Serial.print("D");
+    Serial.print(i);
+    Serial.print(": ");
+    if (d1 &= 1 << (i - 8)) {
+      Serial.println(" PASSED");
+    } else {
+      Serial.println(" FAILED");
+    }
+  }
+
+  // Analog byte
+  for (size_t i=0; i<4; i++) {
+    Serial.print("A");
+    Serial.print(i);
+    Serial.print(": ");
+    if (d1 &= 1 << (i - 8)) {
+      Serial.println(" PASSED");
+    } else {
+      Serial.println(" FAILED");
+    }
+  }
 }
 
 // Receive response
