@@ -89,8 +89,6 @@ void loop() {
     delay(10000);
     #endif
   };
-
-  delay(100);
 }
 
 void receiveEvent(int n) {
@@ -132,7 +130,7 @@ void display_results() {
     if (!digital_results[i]) {
       digital_result = false;
     }
-    #if 1
+    #ifdef SERIAL_DEBUG
     Serial.print(i);
     Serial.print(": ");
     Serial.println(digital_results[i]);
