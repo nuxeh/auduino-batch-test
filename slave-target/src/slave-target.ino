@@ -14,8 +14,6 @@
 bool test = false;
 
 // Test states
-bool analog_pass = false;
-bool digital_pass = false;
 bool analog_test_run = false;
 bool digital_test_run = false;
 
@@ -55,8 +53,12 @@ const size_t NUM_DIGITAL_PAIRS = sizeof(DIGITAL_PAIRS) / sizeof(DIGITAL_PAIRS[0]
 // Set to true on successful test of a pin pair
 bool digital_results[14] = {false};
 
+// Overall test results
 bool analog_result = false;
 bool digital_result = false;
+
+// Results to be sent via I2C
+byte result[3] = {0x00};
 
 #define LED_A 13
 #define LED_D 11
@@ -83,6 +85,7 @@ void loop() {
     reset_results();
     self_test();
     display_results();
+    prepare_result_response();
 
     // Wait before repeating tests
     #ifdef SERIAL_DEBUG
@@ -104,6 +107,10 @@ void receiveEvent(int n) {
   while (Wire.available() > 0) {
     Wire.read();
   }
+}
+
+void prepare_result_response() {
+
 }
 
 // Light LEDs to show results of both tests
@@ -177,6 +184,9 @@ void reset_results() {
   analog_result = false;
   digital_result = false;
 
+  result[0] = 0x00;
+  result[1] = 0x00;
+  result[2] = 0x00;
 }
 
 // Analogue self test
