@@ -37,6 +37,7 @@ void loop() {
       Serial.println("Button pressed, starting scan");
 
       // Run scan
+      digitalWrite(LED_BUILTIN, HIGH); // LED on
       scan();
 
       // Wait for switch to be released
