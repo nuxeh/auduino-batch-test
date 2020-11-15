@@ -86,9 +86,9 @@ int led_state = LOW;
 
 // Flash LED (non-blocking)
 // Allowing fast polled response to button press
-// Using pin interrupt would be an alternative
+// Using pin interrupt would be an alternative for switch detection
 void do_flash() {
-  if (millis() - last_flash > 200) {
+  if (millis() - last_flash > 1000) {
     if (led_state == LOW) {
       digitalWrite(LED_BUILTIN, HIGH);
       led_state = HIGH;
