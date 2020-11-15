@@ -8,6 +8,9 @@
 #define MAX_SLAVES 14
 #endif
 
+bool test_started[127] = {false};
+bool test_results_received[127] = {false};
+
 void setup() {
   Serial.begin(115200);
 
@@ -26,7 +29,8 @@ void setup() {
 void loop() {
   // Wait for switch to be pressed
   while (digitalRead(SWITCH) == HIGH) {
-    do_flash();
+    do_flash(true);
+    poll_results();
   }
 
   // Detect button start event with simple debouncing
@@ -41,7 +45,10 @@ void loop() {
       scan();
 
       // Wait for switch to be released
-      while (digitalRead(SWITCH) == LOW) {}
+      while (digitalRead(SWITCH) == LOW) {
+        do_flash(false);
+        poll_results();
+      }
     }
   }
 }
@@ -74,6 +81,12 @@ void run_test(int addr) {
     Wire.beginTransmission(addr);
     Wire.write("GT");
     Wire.endTransmission();
+
+    test_started[addr] = true;
+}
+
+void poll_results() {
+
 }
 
 // Receive response
@@ -88,8 +101,16 @@ int led_state = LOW;
 // Flash LED (non-blocking)
 // Allowing fast polled response to button press
 // Using pin interrupt would be an alternative for switch detection
-void do_flash() {
-  if (millis() - last_flash > 1000) {
+void do_flash(bool long_flash) {
+  int del;
+
+  if (long_flash) {
+    del = 1000;
+  } else {
+    del = 500;
+  };
+
+  if (millis() - last_flash > del) {
     if (led_state == LOW) {
       digitalWrite(LED_BUILTIN, HIGH);
       led_state = HIGH;
