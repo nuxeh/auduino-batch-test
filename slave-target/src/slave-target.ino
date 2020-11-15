@@ -60,6 +60,9 @@ bool digital_result = false;
 // Results to be sent via I2C
 byte result[3] = {0x00};
 
+// The data requested by master
+int i2c_request = 0;
+
 #define LED_A 13
 #define LED_D 11
 
@@ -76,6 +79,7 @@ void setup() {
 
   Wire.begin(SLAVE_ID);
   Wire.onReceive(receiveEvent);
+  Wire.onRequest(requestEvent);
 }
 
 void loop() {
@@ -94,18 +98,60 @@ void loop() {
   };
 }
 
+// Handler function for I2C data sent by master
+//
+// The following messages are supported:
+// - Go test: Start tests running
+// - Request status: Request the test run status, followed by an I2C request
+// - Request results: Request the test results, followed by an I2C request
+//
+// For sessages requiring data to be returned from slave to master, the master
+// will first send the appropriate message, followed by an I2C request, handled
+// on this slave by requestEvent().
 void receiveEvent(int n) {
   char a = Wire.read();
   char b = Wire.read();
 
   // "Go test" signal
   if (a == 'G' && b == 'T') {
+    i2c_request = 0;
     test = true;
   }
 
-  // Ensure buffer is empty
-  while (Wire.available() > 0) {
-    Wire.read();
+  // "Request status" signal
+  else if (a == 'R' && b == 'S') {
+    i2c_request = 1;
+  }
+
+  // "Request results" signal
+  else if (a == 'R' && b == 'R') {
+    i2c_request = 2;
+  }
+}
+
+// Handler function for I2C requests made by master
+void requestEvent() {
+  // Master previously sent "Request status" signal, send back the status
+  if (i2c_request == 1) {
+    if (analog_test_run && digital_test_run) {
+      // Send back 0x01 - tests have run
+      Wire.write(0x01);
+    } else {
+      // Send back 0x00 - not run
+      Wire.write(0x00);
+    }
+
+    // Reset request state
+    i2c_request = 0;
+  }
+
+  // Master previously sent "Request status" signal, send back the status
+  else if (i2c_request == 2) {
+    // Send back the results aggregated by prepare_result_response()
+    Wire.write(result, 3);
+
+    // Reset request state
+    i2c_request = 0;
   }
 }
 
