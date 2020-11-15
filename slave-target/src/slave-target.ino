@@ -55,6 +55,9 @@ const size_t NUM_DIGITAL_PAIRS = sizeof(DIGITAL_PAIRS) / sizeof(DIGITAL_PAIRS[0]
 // Set to true on successful test of a pin pair
 bool digital_results[14] = {false};
 
+bool analog_result = false;
+bool digital_result = false;
+
 #define LED_A 13
 #define LED_D 11
 
@@ -64,6 +67,8 @@ void setup() {
   Serial.print("Slave ID ");
   Serial.print(SLAVE_ID);
   Serial.println(" starting with serial debug");
+
+  // Start tests automatically when serial debug enabled
   test = true;
   #endif
 
@@ -78,7 +83,9 @@ void loop() {
     display_results();
 
     // Wait before repeating tests
+    #ifdef SERIAL_DEBUG
     delay(10000);
+    #endif
   };
 
   delay(100);
@@ -102,13 +109,13 @@ void receiveEvent(int n) {
 // Light LEDs to show results of both tests
 // Successful test is shown with LED lit
 void display_results() {
-  bool analog = true;
-  bool digital = true;
+  analog_result = true;
+  digital_result = true;
 
-  // Check result for each digital pin
+  // Check result for each digital_result pin
   for (size_t i=0; i<NUM_ANALOG_TEST_INPUTS; i++) {
     if (!analog_results[i]) {
-      analog = false;
+      analog_result = false;
     }
   }
 
@@ -118,10 +125,10 @@ void display_results() {
   int start = 0;
   #endif
 
-  // Check result for each digital pin
+  // Check result for each digital_result pin
   for (int i=start; i<14; i++) {
     if (!digital_results[i]) {
-      digital = false;
+      digital_result = false;
     }
     #if 1
     Serial.print(i);
@@ -135,19 +142,19 @@ void display_results() {
   pinMode(LED_A, OUTPUT);
 
   // Display results
-  digitalWrite(LED_D, digital);
-  digitalWrite(LED_A, analog);
+  digitalWrite(LED_D, digital_result);
+  digitalWrite(LED_A, analog_result);
 
   // Serial debug
   #ifdef SERIAL_DEBUG
   Serial.println("Analogue test: ");
-  if (analog) {
+  if (analog_result) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
   }
   Serial.println("Digital test: ");
-  if (digital) {
+  if (digital_result) {
     Serial.println("PASSED");
   } else {
     Serial.println("FAILED");
@@ -155,7 +162,7 @@ void display_results() {
   #endif
 }
 
-// Reset results to start state
+// Reset results to starting state
 void reset_results() {
   // Digital
   for (int i=0; i<14; i++) {
@@ -166,6 +173,10 @@ void reset_results() {
   for (size_t i=0; i<NUM_ANALOG_TEST_INPUTS; i++) {
     analog_results[i] = true;
   }
+
+  analog_result = false;
+  digital_result = false;
+
 }
 
 // Analogue self test
@@ -296,7 +307,7 @@ void test_analog_level(uint8_t level) {
 
     // Serial debug printing
     #ifdef SERIAL_DEBUG
-    Serial.print("Analog output ");
+    Serial.print("Analog input ");
     Serial.print(i);
     Serial.print(" at level ");
     Serial.print(level);
