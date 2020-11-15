@@ -20,14 +20,13 @@ void setup() {
   Wire.begin();
   Wire.onReceive(receiveEvent);
 
-  Serial.println("Master arduino waiting for input.");
+  Serial.println("Master arduino waiting for input...");
 }
 
 void loop() {
   // Wait for switch to be pressed
   while (digitalRead(SWITCH) == HIGH) {
     do_flash();
-    delay(200);
   }
 
   // Detect button start event with simple debouncing
@@ -44,8 +43,6 @@ void loop() {
       while (digitalRead(SWITCH) == LOW) {}
     }
   }
-
-  delay(50);
 }
 
 // Scan I2C slave devices
@@ -84,9 +81,21 @@ void receiveEvent(int n) {
 
 }
 
-// Flash LED
+unsigned long last_flash = 0;
+int led_state = LOW;
+
+// Flash LED (non-blocking)
+// Allowing fast polled response to button press
+// Using pin interrupt would be an alternative
 void do_flash() {
-    digitalWrite(LED_BUILTIN, HIGH);
-    delay(100);
-    digitalWrite(LED_BUILTIN, LOW);
+  if (millis() - last_flash > 200) {
+    if (led_state == LOW) {
+      digitalWrite(LED_BUILTIN, HIGH);
+      led_state = HIGH;
+    } else {
+      digitalWrite(LED_BUILTIN, LOW);
+      led_state = LOW;
+    };
+    last_flash = millis();
+  }
 }
