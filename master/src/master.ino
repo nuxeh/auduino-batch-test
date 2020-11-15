@@ -167,10 +167,10 @@ void print_result(byte d0, byte d1, byte a0) {
     Serial.print("D");
     Serial.print(i);
     Serial.print(": ");
-    if (d0 &= 1 << i) {
-      Serial.println(" PASSED");
+    if (d0 & (1 << i)) {
+      Serial.println("OK");
     } else {
-      Serial.println(" FAILED");
+      Serial.println("FAILED");
     }
   }
 
@@ -179,10 +179,10 @@ void print_result(byte d0, byte d1, byte a0) {
     Serial.print("D");
     Serial.print(i);
     Serial.print(": ");
-    if (d1 &= 1 << (i - 8)) {
-      Serial.println(" PASSED");
+    if (d1 & (1 << (i - 8))) {
+      Serial.println("OK");
     } else {
-      Serial.println(" FAILED");
+      Serial.println("FAILED");
     }
   }
 
@@ -191,10 +191,10 @@ void print_result(byte d0, byte d1, byte a0) {
     Serial.print("A");
     Serial.print(i);
     Serial.print(": ");
-    if (d1 &= 1 << (i - 8)) {
-      Serial.println(" PASSED");
+    if (a0 & (1 << i)) {
+      Serial.println("OK");
     } else {
-      Serial.println(" FAILED");
+      Serial.println("FAILED");
     }
   }
 }
