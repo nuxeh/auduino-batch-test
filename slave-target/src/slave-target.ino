@@ -109,8 +109,39 @@ void receiveEvent(int n) {
   }
 }
 
+// Prepare the results to be returned over I2C
+//
+// Byte layout:
+//
+//        D
+// 76543210
+// --------
+// 00000000
+//
+//        D
+//   1111
+//   321098
+// --------
+// xx000000
+//
+//        A
+//     3210
+// --------
+// xxxx0000
+//
 void prepare_result_response() {
-
+  // Set bit flags for byte 1, digital pins 0..7 inclusive
+  for (int i=0; i<8; i++) {
+    result[0] |= digital_results[i] << i;
+  }
+  // Set bit flags for byte 2, digital pins 8..13 inclusive
+  for (int i=8; i<14; i++) {
+    result[1] |= digital_results[i] << (i - 8);
+  }
+  // Set bit flags for byte 3, analog pins 0..3 inclusive
+  for (size_t i=0; i<NUM_ANALOG_TEST_INPUTS; i++) {
+    result[2] |= analog_results[i] << i;
+  }
 }
 
 // Light LEDs to show results of both tests
