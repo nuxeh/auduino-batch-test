@@ -258,6 +258,8 @@ void reset_results() {
     analog_results[i] = true;
   }
 
+  analog_test_run = false;
+  digital_test_run = false;
   analog_result = false;
   digital_result = false;
 

@@ -42,6 +42,7 @@ void loop() {
 
       // Run scan
       digitalWrite(LED_BUILTIN, HIGH); // LED on
+      reset_state();
       scan();
 
       // Wait for switch to be released
@@ -50,6 +51,14 @@ void loop() {
         poll_results();
       }
     }
+  }
+}
+
+// Reset test state for all possible slaves
+void reset_state() {
+  for (int i=0; i<128; i++) {
+    test_started[i] = false;
+    test_results_received[i] = false;
   }
 }
 
@@ -103,7 +112,8 @@ void _poll_results() {
       // for which no results have yet been received.
       if (test_started[addr] && ! test_results_received[addr]) {
         Serial.print("INFO: Requesting status for slave address ");
-        Serial.println(addr);
+        Serial.print(addr);
+        Serial.print("... response: ");
 
         // Request slave status
         Wire.beginTransmission(addr);
@@ -120,9 +130,20 @@ void _poll_results() {
           Wire.write("RR"); // Request results
           Wire.endTransmission();
           Wire.requestFrom(addr, 3);
-          Serial.println(Wire.read(), BIN);
-          Serial.println(Wire.read(), BIN);
-          Serial.println(Wire.read(), BIN);
+
+          byte d0 = Wire.read();
+          byte d1 = Wire.read();
+          byte a0 = Wire.read();
+
+          // Flag results received
+          test_results_received[addr] = true;
+
+          // Check results
+          if (d0 == 0b11111111 && d1 == 0b111111 && a0 == 0b1111) {
+            Serial.print("Slave ");
+            Serial.print(addr);
+            Serial.println(" PASSED");
+          }
         }
       }
     }
