@@ -78,6 +78,8 @@ void setup() {
 
 void loop() {
   if (test) {
+    test = false;
+    do_flash(10); // Flash LEDs on test start
     reset_results();
     self_test();
     display_results();
@@ -204,11 +206,16 @@ int self_test() {
   return 0;
 }
 
-// Flash LED(s)
-void do_flash() {
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(100);
-  digitalWrite(LED_BUILTIN, LOW);
+// Flash LED(s) n times
+void do_flash(int n) {
+  for (int i=0; i<n; i++) {
+    digitalWrite(LED_A, HIGH);
+    digitalWrite(LED_D, HIGH);
+    delay(75);
+    digitalWrite(LED_A, LOW);
+    digitalWrite(LED_D, LOW);
+    delay(75);
+  }
 }
 
 /* Test a digital pin
