@@ -158,9 +158,11 @@ void _poll_results() {
 // Format and print detailed results
 // Checks the returned bitfield flags for each i/o pin
 void print_result(byte d0, byte d1, byte a0) {
+  #if 0
   Serial.println(d0, BIN);
   Serial.println(d1, BIN);
   Serial.println(a0, BIN);
+  #endif
 
   // Digital lower byte
   for (int i=0; i<8; i++) {
