@@ -98,19 +98,24 @@ void poll_results() {
 // Poll results
 void _poll_results() {
     // Check test run status for all possible slaves
-    for (int addr=0; addr<128; addr++) {
+    for (int addr=1; addr<128; addr++) {
       // Make requests for those slaves for which a test has started, but
       // for which no results have yet been received.
       if (test_started[addr] && ! test_results_received[addr]) {
+        Serial.print("INFO: Requesting status for slave address ");
+        Serial.println(addr);
+
         // Request slave status
         Wire.beginTransmission(addr);
         Wire.write("RS"); // Request status
         Wire.endTransmission();
         Wire.requestFrom(addr, 1);
+        byte resp = Wire.read();
+        Serial.println(resp, HEX);
 
         // Check if test has completed on slave
         // Request results if so
-        if (Wire.read() == 0x01) {
+        if (resp == 0x01) {
           Wire.beginTransmission(addr);
           Wire.write("RR"); // Request results
           Wire.endTransmission();
