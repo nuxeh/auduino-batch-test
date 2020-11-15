@@ -260,6 +260,10 @@ void test_digital_pair(const int *n) {
     result = false;
   }
 
+  // Set pins as high impedance now test has run
+  pinMode(n[0], INPUT);
+  pinMode(n[1], INPUT);
+
   // Update results (update both tested pins)
   if (result) {
     digital_results[n[0]] = true;
@@ -300,6 +304,7 @@ void test_analog_level(uint8_t level) {
     // Test case
     // Difference between read analog value and expected value is more than
     // the dead band, so fail
+    pinMode(ANALOG_INPUTS[i], INPUT);
     int measured = (int) analogRead(ANALOG_INPUTS[i]);
 
     if (abs(measured - expected) > ANALOG_DEAD_BAND) {
