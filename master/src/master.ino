@@ -80,6 +80,7 @@ void scan() {
       run_test(addr);
     }
 
+    // Delay between test starts for slaves
     delay(200);
   }
 }

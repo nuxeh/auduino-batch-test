@@ -85,6 +85,7 @@ void setup() {
 void loop() {
   if (test) {
     test = false;
+
     do_flash(10); // Flash LEDs on test start
     reset_results();
     self_test();
