@@ -129,6 +129,9 @@ void _poll_results() {
         byte resp = Wire.read();
         Serial.println(resp, HEX);
 
+        // Delay between status request and results request
+	delay(100);
+
         // Check if test has completed on slave
         // Request results if so
         if (resp == 0x01) {
