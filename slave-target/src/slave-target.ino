@@ -193,6 +193,10 @@ void prepare_result_response() {
   for (size_t i=0; i<NUM_ANALOG_TEST_INPUTS; i++) {
     result[2] |= analog_results[i] << i;
   }
+
+  // The result has now been prepared and is ready to send back to master
+  digital_test_run = true;
+  analog_test_run = true;
 }
 
 // Light LEDs to show results of both tests
@@ -292,8 +296,6 @@ int self_test() {
   for (size_t i=0; i<NUM_DIGITAL_PAIRS; i++) {
     test_digital_pair(DIGITAL_PAIRS[i]);
   }
-
-  digital_test_run = true;
 
   return 0;
 }
@@ -428,6 +430,4 @@ void test_analog_level(uint8_t level) {
 
     delay(100);
   }
-
-  analog_test_run = true;
 }
