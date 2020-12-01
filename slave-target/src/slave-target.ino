@@ -80,6 +80,10 @@ void setup() {
   Wire.begin(SLAVE_ID);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
+
+  // Disable I2C pull-up resistors
+  digitalWrite(SCL, LOW);
+  digitalWrite(SDA, LOW);
 }
 
 void loop() {
