@@ -155,6 +155,9 @@ void _poll_results() {
             print_result(d0, d1, a0);
           }
         }
+
+        // Throttle poll rate between slaves
+	delay(100);
       }
     }
 }
