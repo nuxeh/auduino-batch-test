@@ -24,6 +24,9 @@ void setup() {
   Wire.begin();
   Wire.onReceive(receiveEvent);
 
+  // Use lower I2C clock speed (100 kHz)
+  Wire.setClock(100000);
+
   Serial.println("Master arduino waiting for input...");
 }
 
