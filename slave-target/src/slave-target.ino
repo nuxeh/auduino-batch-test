@@ -136,6 +136,9 @@ void receiveEvent(int n) {
 
 // Handler function for I2C requests made by master
 void requestEvent() {
+  // Delay before returning response to make sure master is ready
+  delay(50);
+
   // Master previously sent "Request status" signal, send back the status
   if (i2c_request == 1) {
     if (analog_test_run && digital_test_run) {
