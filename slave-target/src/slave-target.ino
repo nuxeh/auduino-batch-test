@@ -58,7 +58,7 @@ bool analog_result = false;
 bool digital_result = false;
 
 // Results to be sent via I2C
-byte result[3] = {0x00};
+byte result[7] = {0x00};
 
 // The data requested by master
 int i2c_request = 0;
@@ -66,7 +66,12 @@ int i2c_request = 0;
 #define LED_A 13
 #define LED_D 11
 
+long vcc = -1;
+
 void setup() {
+  // Measure Vcc
+  vcc = read_vcc();
+
   #ifdef SERIAL_DEBUG
   Serial.begin(115200);
   Serial.print("Slave ID ");
@@ -74,7 +79,7 @@ void setup() {
   Serial.println(" starting with serial debug");
 
   Serial.println("Supply voltage: ");
-  Serial.println(read_vcc(), DEC);
+  Serial.println(vcc, DEC);
 
   // Start tests automatically when serial debug enabled
   test = true;
@@ -102,6 +107,7 @@ void loop() {
     // Wait before repeating tests
     #ifdef SERIAL_DEBUG
     delay(10000);
+    test = true;
     #endif
   };
 }
@@ -159,7 +165,7 @@ void requestEvent() {
   // Master previously sent "Request status" signal, send back the status
   else if (i2c_request == 2) {
     // Send back the results aggregated by prepare_result_response()
-    Wire.write(result, 3);
+    Wire.write(result, 7);
 
     // Reset request state
     i2c_request = 0;
@@ -281,11 +287,20 @@ void reset_results() {
   result[0] = 0x00;
   result[1] = 0x00;
   result[2] = 0x00;
+  result[3] = 0x00;
+  result[4] = 0x00;
+  result[5] = 0x00;
+  result[6] = 0x00;
+  result[7] = 0x00;
 }
 
-// Analogue self test
-// Returns 0 for success
+// Self test
 int self_test() {
+  // Measure Vcc and pack into result array
+  vcc = read_vcc();
+  for (int i = 0; i<4; i++)
+    result[i+3] = (byte) (vcc >> (i*8)) && 0xff;
+
   // Run analog test for all levels defined in ANALOG_TEST_LEVELS
   for (size_t i=0; i<NUM_ANALOG_LEVELS; i++) {
     // Serial print
@@ -440,10 +455,14 @@ void test_analog_level(uint8_t level) {
 
 long read_vcc() {
   long result; // Read 1.1V reference against AVcc
+  byte admux_old = ADMUX; // Store value of ADMUX register
+
   ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
   delay(2); // Wait for Vref to settle
   ADCSRA |= _BV(ADSC); // Convert
   while (bit_is_set(ADCSRA,ADSC));
   result = ADCL; result |= ADCH<<8;
+
+  ADMUX = admux_old;
   return 1126400L / result; // Back-calculate AVcc in mV return result
 }
