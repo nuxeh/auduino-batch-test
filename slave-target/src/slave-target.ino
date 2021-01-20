@@ -58,7 +58,7 @@ bool analog_result = false;
 bool digital_result = false;
 
 // Results to be sent via I2C
-byte result[7] = {0x00};
+byte result[5] = {0x00};
 
 // The data requested by master
 int i2c_request = 0;
@@ -66,7 +66,7 @@ int i2c_request = 0;
 #define LED_A 13
 #define LED_D 11
 
-long vcc = -1;
+uint16_t vcc = -2;
 
 void setup() {
   // Measure Vcc
@@ -162,10 +162,10 @@ void requestEvent() {
     i2c_request = 0;
   }
 
-  // Master previously sent "Request status" signal, send back the status
+  // Master previously sent "Request results" signal, send back the results
   else if (i2c_request == 2) {
     // Send back the results aggregated by prepare_result_response()
-    Wire.write(result, 7);
+    Wire.write(result, 5);
 
     // Reset request state
     i2c_request = 0;
@@ -290,16 +290,16 @@ void reset_results() {
   result[3] = 0x00;
   result[4] = 0x00;
   result[5] = 0x00;
-  result[6] = 0x00;
-  result[7] = 0x00;
 }
 
 // Self test
 int self_test() {
   // Measure Vcc and pack into result array
+  // Vcc is a 16-bit unsigned integer, so we need 2 bytes
   vcc = read_vcc();
-  for (int i = 0; i<4; i++)
-    result[i+3] = (byte) (vcc >> (i*8)) && 0xff;
+  for (int i=0; i<2; i++) {
+    result[i+3] = (byte) ((vcc >> (i*8)) & 0xff);
+  }
 
   // Run analog test for all levels defined in ANALOG_TEST_LEVELS
   for (size_t i=0; i<NUM_ANALOG_LEVELS; i++) {
@@ -453,15 +453,16 @@ void test_analog_level(uint8_t level) {
   }
 }
 
-long read_vcc() {
-  long result; // Read 1.1V reference against AVcc
+uint16_t read_vcc() {
+  uint16_t result; // Read 1.1V reference against AVcc
   byte admux_old = ADMUX; // Store value of ADMUX register
 
   ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
   delay(2); // Wait for Vref to settle
   ADCSRA |= _BV(ADSC); // Convert
   while (bit_is_set(ADCSRA,ADSC));
-  result = ADCL; result |= ADCH<<8;
+  result = ADCL;
+  result |= ADCH << 8;
 
   ADMUX = admux_old;
   return 1126400L / result; // Back-calculate AVcc in mV return result

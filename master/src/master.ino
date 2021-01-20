@@ -135,14 +135,26 @@ void _poll_results() {
         // Check if test has completed on slave
         // Request results if so
         if (resp == 0x01) {
+          uint16_t vcc = 0;
+
           Wire.beginTransmission(addr);
           Wire.write("RR"); // Request results
           Wire.endTransmission();
-          Wire.requestFrom(addr, 3);
+          Wire.requestFrom(addr, 5);
 
           byte d0 = Wire.read();
           byte d1 = Wire.read();
           byte a0 = Wire.read();
+          byte v1 = Wire.read();
+          byte v2 = Wire.read();
+
+          Serial.println(v1, BIN);
+          Serial.println(v2, BIN);
+
+          vcc |= v1;
+          vcc |= v2 << 8;
+
+          Serial.println(vcc, BIN);
 
           // Flag results received
           test_results_received[addr] = true;
@@ -157,6 +169,11 @@ void _poll_results() {
             Serial.println(" FAILED");
             print_result(d0, d1, a0);
           }
+
+          // Print Vcc
+	  Serial.print("Vcc: ");
+	  Serial.print(vcc, DEC);
+	  Serial.println(" mV");
         }
 
         // Throttle poll rate between slaves
